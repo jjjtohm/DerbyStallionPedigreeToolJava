@@ -293,11 +293,18 @@ public class PedigreeTool {
             String sireStallion = sirePedigree.get(sireX);
 
             // 凝った配合
-            if (!isElaboration && damToSireElaboSet.contains(sireStallion)) {
+            if (
+                !isElaboration && sireX <= 7
+                && damToSireElaboSet.contains(sireStallion)
+            ) {
+                System.out.println("sire:" + sireStallion);
                 result.setElaboration(true);
                 isElaboration = true;
             }
-            if (!isElaboration && sireToDamElaboMap.keySet().contains(sireStallion)) {
+            if (
+                !isElaboration && sireX <= 7
+                && sireToDamElaboMap.keySet().contains(sireStallion)
+            ) {
                 sireToDamElaboSet.addAll(sireToDamElaboMap.get(sireStallion));
             }
 
@@ -312,11 +319,18 @@ public class PedigreeTool {
                 String damStallion = damPedigree.get(damX);
 
                 // 凝った配合
-                if (!isElaboration && sireToDamElaboSet.contains(damStallion)) {
+                if (
+                    !isElaboration && sireX <= 7 && damX <= 6
+                    &&sireToDamElaboSet.contains(damStallion)
+                ) {
+                    System.out.println("dam:" + damStallion);
                     result.setElaboration(true);
                     isElaboration = true;
                 }
-                if (!isElaboration && damToSireElaboMap.keySet().contains(damStallion)) {
+                if (
+                    !isElaboration && damX <= 6
+                    && damToSireElaboMap.keySet().contains(damStallion)
+                ) {
                     damToSireElaboSet.addAll(damToSireElaboMap.get(damStallion));
                 }
 
