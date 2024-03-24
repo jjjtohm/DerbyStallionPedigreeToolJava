@@ -1,6 +1,7 @@
 package base;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -125,40 +126,108 @@ public class PedigreeTool {
         return ancestors;
     }
 
-    private static void addSkipCrossIndex(HashSet<Integer> skipSet, int index) {
-        skipSet.add(index);
-        switch (index) {
-            case 0:
-                skipSet.add(1);
-                skipSet.add(3);
-                skipSet.add(4);
-                skipSet.add(7);
-                skipSet.add(8);
-                skipSet.add(9);
-                skipSet.add(10);
-                break;
-            case 1:
-                skipSet.add(3);
-                skipSet.add(7);
-                skipSet.add(8);
-                break;
-            case 2:
-                skipSet.add(5);
-                skipSet.add(11);
-                skipSet.add(12);
-                break;
-            case 3:
-                skipSet.add(7);
-                break;
-            case 4:
-                skipSet.add(9);
-                break;
-            case 5:
-                skipSet.add(11);
-                break;
-            case 6:
-                skipSet.add(13);
-                break;
+    HashSet<Integer> sireCrossSkip      = new HashSet<Integer>();
+    HashMap<Integer, Integer> crossSkip = new HashMap<Integer, Integer>();
+    private static void addSkipCrossIndex(
+        int sireX, int damX, HashSet<Integer> sireCrossSkip, HashMap<Integer, Set<Integer>> crossSkip
+    ) {
+        sireCrossSkip.add(sireX);
+        if (crossSkip.containsKey(sireX)) {
+            crossSkip.get(sireX).add(damX);
+        } else {
+            HashSet<Integer> tmp = new HashSet<Integer>();
+            tmp.add(damX);
+            crossSkip.put(sireX, tmp);
+        }
+        
+        ArrayList<Integer> sireFollowings = new ArrayList<Integer>(8);
+        if (sireX == 0) {
+            sireFollowings.add(1);
+            sireFollowings.add(2);
+            sireFollowings.add(4);
+            sireFollowings.add(5);
+            sireFollowings.add(8);
+            sireFollowings.add(9);
+            sireFollowings.add(10);
+            sireFollowings.add(11);
+        } else if (sireX == 1) {
+            sireFollowings.add(2);
+            sireFollowings.add(4);
+            sireFollowings.add(5);
+            sireFollowings.add(8);
+            sireFollowings.add(9);
+            sireFollowings.add(10);
+            sireFollowings.add(11);
+        } else if (sireX == 2) {
+            sireFollowings.add(4);
+            sireFollowings.add(8);
+            sireFollowings.add(9);
+        } else if (sireX == 3) {
+            sireFollowings.add(6);
+            sireFollowings.add(12);
+            sireFollowings.add(13);
+        } else if (sireX == 4) {
+            sireFollowings.add(8);
+        } else if (sireX == 5) {
+            sireFollowings.add(10);
+        } else if (sireX == 6) {
+            sireFollowings.add(12);
+        } else if (sireX == 7) {
+            sireFollowings.add(14);
+        }
+
+        ArrayList<Integer> damFollowings = new ArrayList<Integer>(7);
+        if (damX == 0) {
+            damFollowings.add(1);
+            damFollowings.add(3);
+            damFollowings.add(4);
+            damFollowings.add(7);
+            damFollowings.add(8);
+            damFollowings.add(9);
+            damFollowings.add(10);
+        } else if (damX == 1) {
+            damFollowings.add(3);
+            damFollowings.add(7);
+            damFollowings.add(8);
+        } else if (damX == 2) {
+            damFollowings.add(5);
+            damFollowings.add(11);
+            damFollowings.add(12);
+        } else if (damX == 3) {
+            damFollowings.add(7);
+        } else if (damX == 4) {
+            damFollowings.add(9);
+        } else if (damX == 5) {
+            damFollowings.add(11);
+        } else if (damX == 6) {
+            damFollowings.add(13);
+        }
+
+        for (int i = 0; i < Math.min(sireFollowings.size(), damFollowings.size()); i++) {
+            int nextSireIndex = sireFollowings.get(i);
+            int nextDamIndex  = damFollowings.get(i);
+            sireCrossSkip.add(sireFollowings.get(i));
+            if (crossSkip.containsKey(nextSireIndex)) {
+                crossSkip.get(nextSireIndex).add(nextDamIndex);
+            } else {
+                HashSet<Integer> tmp = new HashSet<Integer>();
+                tmp.add(nextDamIndex);
+                crossSkip.put(nextSireIndex, tmp);
+            }
+        }
+    }
+
+    private static boolean isCrossSkip(
+        int sireX, int damX, Set<Integer> sireCrossSkip, Map<Integer, Set<Integer>> crossSkip
+    ) {
+        if (sireCrossSkip.contains(sireX)) {
+            if (crossSkip.get(sireX).contains(damX)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 
@@ -211,15 +280,15 @@ public class PedigreeTool {
             result.setInteresting(true);
         }
 
-        List<String> sirePedigree         = expandAncestors(sire, stallionSet, true);
-        List<String> damPedigree          = expandAncestors(dam, stallionSet, false);
-        HashSet<Integer> sireCrossSkip    = new HashSet<Integer>();
-        HashSet<Integer> damCrossSkip     = new HashSet<Integer>();
-        HashSet<String> nitroSet          = new HashSet<String>();
-        HashSet<String> sireToDamElaboSet = new HashSet<String>();
-        HashSet<String> damToSireElaboSet = new HashSet<String>();
-        int numCross                      = 0;
-        boolean isElaboration             = false;
+        List<String> sirePedigree                = expandAncestors(sire, stallionSet, true);
+        List<String> damPedigree                 = expandAncestors(dam, stallionSet, false);
+        HashSet<Integer> sireCrossSkip           = new HashSet<Integer>();
+        HashMap<Integer, Set<Integer>> crossSkip = new HashMap<Integer, Set<Integer>>();
+        HashSet<String> nitroSet                 = new HashSet<String>();
+        HashSet<String> sireToDamElaboSet        = new HashSet<String>();
+        HashSet<String> damToSireElaboSet        = new HashSet<String>();
+        int numCross                             = 0;
+        boolean isElaboration                    = false;
         for (int sireX = 0; sireX < 16; sireX++) {
             String sireStallion = sirePedigree.get(sireX);
 
@@ -260,16 +329,14 @@ public class PedigreeTool {
 
                 // クロス
                 if (
-                    !sireCrossSkip.contains(sireX)
-                    && !damCrossSkip.contains(damX)
+                    !isCrossSkip(sireX, damX, sireCrossSkip, crossSkip)
                     && damStallion.equals(sireStallion)
                 ) {
                     // 血量が50%以上になるクロスが存在したら危険な配合
                     if (sireX == 0 || (sireX == 1 && damX == 1)) {
                         result.setDanger(true);
                     }
-                    addSkipCrossIndex(sireCrossSkip, sireX);
-                    addSkipCrossIndex(damCrossSkip, damX);
+                    addSkipCrossIndex(sireX, damX, sireCrossSkip, crossSkip);
                     if (effectSet.size() != 0) {
                         numCross += 1;
                         Iterator<Effect> effectIt = effectSet.iterator();
