@@ -297,7 +297,6 @@ public class PedigreeTool {
                 !isElaboration && sireX <= 7
                 && damToSireElaboSet.contains(sireStallion)
             ) {
-                System.out.println("sire:" + sireStallion);
                 result.setElaboration(true);
                 isElaboration = true;
             }
@@ -323,7 +322,6 @@ public class PedigreeTool {
                     !isElaboration && sireX <= 7 && damX <= 6
                     &&sireToDamElaboSet.contains(damStallion)
                 ) {
-                    System.out.println("dam:" + damStallion);
                     result.setElaboration(true);
                     isElaboration = true;
                 }
